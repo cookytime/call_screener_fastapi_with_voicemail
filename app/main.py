@@ -4,7 +4,7 @@ import os
 
 app = FastAPI()
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.post("/voice")
 async def voice_response(request: Request):
@@ -12,14 +12,14 @@ async def voice_response(request: Request):
     user_input = form.get("SpeechResult", "Hello")
 
     # ChatGPT response
-    response = openai.ChatCompletion.create(
+    chat_response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a polite AI receptionist. Greet the caller and ask how you can help."},
             {"role": "user", "content": user_input}
         ]
     )
-    reply = response.choices[0].message["content"]
+    reply = chat_response.choices[0].message.content
 
     # TwiML response with voicemail recording
     twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
